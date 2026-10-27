@@ -1,0 +1,4446 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>GABO GRAPH QUEST | Grafos y Movilidad</title>
+
+<style>
+
+/* =========================================================
+   CONFIGURACIÓN GENERAL
+   ========================================================= */
+
+:root{
+    --rojo:#c9252d;
+    --rojo-oscuro:#941d24;
+    --amarillo:#f5c400;
+    --amarillo-claro:#fff4bd;
+    --gris:#eef1f4;
+    --gris-2:#d8dde2;
+    --gris-3:#737b84;
+    --negro:#20242a;
+    --blanco:#ffffff;
+    --verde:#1f9d63;
+    --azul:#2867c7;
+    --naranja:#ed8b22;
+    --sombra:0 18px 45px rgba(20,25,30,.13);
+}
+
+*{
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    margin:0;
+    min-height:100vh;
+    font-family:Arial, Helvetica, sans-serif;
+    color:var(--negro);
+    background:
+        radial-gradient(circle at 10% 5%, #ffffff 0 12%, transparent 30%),
+        linear-gradient(135deg,#f8f9fa,#e8edf1);
+}
+
+button{
+    font-family:inherit;
+}
+
+.hidden{
+    display:none !important;
+}
+
+button:focus-visible{
+    outline:4px solid rgba(245,196,0,.45);
+}
+
+/* =========================================================
+   BARRA SUPERIOR
+   ========================================================= */
+
+.topbar{
+    position:sticky;
+    top:0;
+    z-index:50;
+    min-height:72px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+    padding:10px 22px;
+    background:rgba(255,255,255,.95);
+    backdrop-filter:blur(14px);
+    border-bottom:1px solid #dfe3e7;
+    box-shadow:0 5px 20px rgba(0,0,0,.07);
+}
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.brand-logo{
+    width:50px;
+    height:50px;
+    object-fit:contain;
+}
+
+.brand-title{
+    font-size:1.05rem;
+    font-weight:900;
+}
+
+.brand-subtitle{
+    display:block;
+    margin-top:3px;
+    color:#727981;
+    font-size:.76rem;
+}
+
+.top-actions{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.icon-button,
+.small-button,
+.primary-button,
+.danger-button{
+    border:0;
+    cursor:pointer;
+    transition:.2s ease;
+}
+
+.icon-button{
+    background:#f1f3f5;
+    border-radius:12px;
+    padding:10px 13px;
+    font-size:1.1rem;
+}
+
+.icon-button:hover,
+.small-button:hover{
+    transform:translateY(-2px);
+}
+
+.small-button{
+    background:#fff;
+    border:1px solid #d6dce1;
+    border-radius:11px;
+    padding:9px 13px;
+    font-weight:800;
+}
+
+.primary-button{
+    background:linear-gradient(135deg,var(--rojo),#e0444b);
+    color:white;
+    padding:13px 21px;
+    border-radius:14px;
+    font-weight:900;
+    box-shadow:0 9px 20px rgba(201,37,45,.23);
+}
+
+.primary-button:hover{
+    transform:translateY(-2px);
+}
+
+.danger-button{
+    background:#fff0f1;
+    color:var(--rojo-oscuro);
+    border:1px solid #f0b8bd;
+    padding:10px 14px;
+    border-radius:11px;
+    font-weight:800;
+}
+
+/* =========================================================
+   CONTENEDOR
+   ========================================================= */
+
+main{
+    width:min(1250px,94%);
+    margin:auto;
+    padding:30px 0 55px;
+}
+
+/* =========================================================
+   PANTALLA DE INICIO
+   ========================================================= */
+
+.hero{
+    min-height:calc(100vh - 100px);
+    display:grid;
+    place-items:center;
+}
+
+.hero-card{
+    width:min(930px,100%);
+    position:relative;
+    overflow:hidden;
+    text-align:center;
+    background:rgba(255,255,255,.96);
+    border:1px solid #e0e4e8;
+    border-radius:32px;
+    box-shadow:var(--sombra);
+    padding:45px 30px;
+}
+
+.hero-card::before{
+    content:"";
+    position:absolute;
+    width:300px;
+    height:300px;
+    border-radius:50%;
+    background:#fff1a7;
+    top:-160px;
+    right:-100px;
+}
+
+.hero-card::after{
+    content:"";
+    position:absolute;
+    width:220px;
+    height:220px;
+    border-radius:50%;
+    background:#ffe9ea;
+    bottom:-130px;
+    left:-100px;
+}
+
+.hero-logo{
+    position:relative;
+    width:180px;
+    height:180px;
+    object-fit:contain;
+    z-index:1;
+}
+
+.kicker{
+    position:relative;
+    display:inline-block;
+    margin:10px 0;
+    padding:8px 14px;
+    border-radius:100px;
+    background:var(--amarillo-claro);
+    color:#715600;
+    font-weight:900;
+    font-size:.78rem;
+    letter-spacing:.06em;
+}
+
+.hero h1{
+    position:relative;
+    margin:10px 0 17px;
+    font-size:clamp(2.4rem,7vw,5rem);
+    line-height:.9;
+    letter-spacing:-3px;
+}
+
+.hero h1 span{
+    color:var(--rojo);
+}
+
+.hero-description{
+    position:relative;
+    max-width:700px;
+    margin:auto;
+    color:#626a73;
+    line-height:1.65;
+    font-size:1.05rem;
+}
+
+.hero-stats{
+    position:relative;
+    display:flex;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:10px;
+    margin:25px 0;
+}
+
+.stat{
+    background:#f5f6f7;
+    border:1px solid #e0e3e6;
+    border-radius:100px;
+    padding:10px 15px;
+    font-weight:900;
+}
+
+/* =========================================================
+   MENÚ DE NIVELES
+   ========================================================= */
+
+.screen-title{
+    display:flex;
+    justify-content:space-between;
+    align-items:end;
+    gap:15px;
+    margin-bottom:22px;
+}
+
+.screen-title h2{
+    margin:0;
+    font-size:2rem;
+}
+
+.screen-title p{
+    margin:6px 0 0;
+    color:#6d747c;
+}
+
+.level-grid{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:14px;
+}
+
+.level-card{
+    position:relative;
+    min-height:210px;
+    text-align:left;
+    padding:20px;
+    background:#fff;
+    border:1px solid #dfe3e7;
+    border-radius:21px;
+    box-shadow:0 8px 25px rgba(30,36,42,.07);
+    cursor:pointer;
+    transition:.2s ease;
+}
+
+.level-card:hover:not(.locked){
+    transform:translateY(-6px);
+    box-shadow:var(--sombra);
+}
+
+.level-card.locked{
+    opacity:.5;
+    cursor:not-allowed;
+    filter:saturate(.2);
+}
+
+.level-number{
+    width:44px;
+    height:44px;
+    display:grid;
+    place-items:center;
+    border-radius:14px;
+    background:#fff0f1;
+    color:var(--rojo);
+    font-size:1.2rem;
+    font-weight:900;
+}
+
+.level-card h3{
+    margin:15px 0 7px;
+}
+
+.level-card p{
+    margin:0;
+    color:#68717a;
+    font-size:.88rem;
+    line-height:1.5;
+}
+
+.level-status{
+    position:absolute;
+    top:16px;
+    right:15px;
+    font-size:.78rem;
+    font-weight:900;
+}
+
+.status-done{
+    color:var(--verde);
+}
+
+.status-lock{
+    color:#8b9299;
+}
+
+/* =========================================================
+   PROGRESO
+   ========================================================= */
+
+.progress-card{
+    background:white;
+    border:1px solid #e0e4e8;
+    border-radius:18px;
+    padding:15px;
+    margin-bottom:18px;
+    box-shadow:0 6px 20px rgba(0,0,0,.05);
+}
+
+.progress-header{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:8px;
+    font-size:.85rem;
+    font-weight:900;
+}
+
+.progress-track{
+    height:11px;
+    overflow:hidden;
+    background:#e9edf0;
+    border-radius:100px;
+}
+
+.progress-fill{
+    width:0;
+    height:100%;
+    background:linear-gradient(90deg,var(--rojo),var(--amarillo));
+    border-radius:100px;
+    transition:.35s;
+}
+
+/* =========================================================
+   JUEGO
+   ========================================================= */
+
+.game-grid{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 320px;
+    gap:18px;
+}
+
+.game-card,
+.side-card{
+    background:#fff;
+    border:1px solid #dfe4e8;
+    border-radius:22px;
+    box-shadow:0 9px 28px rgba(26,31,36,.07);
+}
+
+.game-card{
+    padding:18px;
+}
+
+.game-header{
+    display:flex;
+    justify-content:space-between;
+    gap:15px;
+    margin-bottom:13px;
+}
+
+.game-header h2{
+    margin:0;
+    font-size:1.4rem;
+}
+
+.game-header p{
+    margin:6px 0 0;
+    color:#69717a;
+    line-height:1.45;
+}
+
+.badges{
+    display:flex;
+    gap:7px;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+}
+
+.badge{
+    padding:8px 10px;
+    border-radius:10px;
+    background:#f4f5f6;
+    font-size:.76rem;
+    font-weight:900;
+    white-space:nowrap;
+}
+
+.badge.red{
+    background:#fff0f1;
+    color:var(--rojo);
+}
+
+.badge.gold{
+    background:#fff5c9;
+    color:#6e5500;
+}
+
+/* =========================================================
+   CANVAS
+   ========================================================= */
+
+.canvas-container{
+    position:relative;
+    overflow:hidden;
+    background:
+        linear-gradient(145deg,#fbfcfd,#e9eef2);
+    border:1px solid #dce2e6;
+    border-radius:18px;
+}
+
+#graphCanvas{
+    display:block;
+    width:100%;
+    height:auto;
+    touch-action:none;
+}
+
+.canvas-help{
+    position:absolute;
+    bottom:10px;
+    left:10px;
+    padding:7px 10px;
+    background:rgba(255,255,255,.93);
+    border:1px solid #dfe3e6;
+    border-radius:10px;
+    font-size:.74rem;
+    color:#59616a;
+    pointer-events:none;
+}
+
+/* =========================================================
+   PANEL LATERAL
+   ========================================================= */
+
+.side-card{
+    height:max-content;
+    padding:18px;
+}
+
+.side-card h3{
+    margin:0 0 12px;
+}
+
+.objective{
+    padding:12px;
+    background:#fff8dc;
+    border-left:4px solid var(--amarillo);
+    border-radius:10px;
+    line-height:1.5;
+    font-size:.9rem;
+}
+
+.stats-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:9px;
+    margin:15px 0;
+}
+
+.game-stat{
+    padding:11px;
+    border-radius:12px;
+    background:#f5f6f7;
+}
+
+.game-stat span{
+    display:block;
+    color:#747c85;
+    font-size:.75rem;
+}
+
+.game-stat strong{
+    font-size:1.25rem;
+}
+
+.message{
+    min-height:52px;
+    margin:13px 0;
+    padding:12px;
+    border-radius:12px;
+    background:#f3f5f7;
+    color:#4e565f;
+    line-height:1.45;
+    font-size:.9rem;
+}
+
+.message.success{
+    background:#eaf8f1;
+    color:#176c45;
+    border:1px solid #b9e7cf;
+}
+
+.message.error{
+    background:#fff0f1;
+    color:#9b1f28;
+    border:1px solid #f1b8bc;
+}
+
+.message.info{
+    background:#eef5ff;
+    color:#245999;
+    border:1px solid #c9dcf8;
+}
+
+.info-list{
+    padding-left:18px;
+    margin:12px 0;
+    color:#626a73;
+    line-height:1.6;
+    font-size:.87rem;
+}
+
+.controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:12px;
+}
+
+.stars{
+    font-size:1.3rem;
+    letter-spacing:2px;
+    color:#d49f00;
+}
+
+/* =========================================================
+   PREGUNTAS
+   ========================================================= */
+
+.quiz{
+    display:grid;
+    gap:9px;
+    margin-top:15px;
+}
+
+.question{
+    padding:15px;
+    border-radius:14px;
+    background:#f7f8f9;
+    border:1px solid #e0e4e8;
+    font-weight:800;
+    line-height:1.45;
+}
+
+.option{
+    border:1px solid #dce1e5;
+    background:#fff;
+    text-align:left;
+    padding:12px;
+    border-radius:12px;
+    cursor:pointer;
+    font-weight:700;
+    transition:.18s;
+}
+
+.option:hover{
+    background:#f7f8f9;
+    transform:translateX(2px);
+}
+
+.option.correct{
+    background:#eaf8f1;
+    border-color:#53b888;
+}
+
+.option.wrong{
+    background:#fff0f1;
+    border-color:#e58b91;
+}
+
+/* =========================================================
+   PANTALLAS DE RESULTADO
+   ========================================================= */
+
+.result-screen{
+    background:#fff;
+    border:1px solid #e0e4e8;
+    border-radius:28px;
+    box-shadow:var(--sombra);
+    padding:42px 25px;
+    text-align:center;
+}
+
+.result-icon{
+    font-size:4rem;
+}
+
+.result-screen h2{
+    font-size:2.2rem;
+    margin:10px 0;
+}
+
+.result-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+    max-width:800px;
+    margin:25px auto;
+}
+
+.result-box{
+    background:#f5f6f7;
+    padding:15px;
+    border-radius:14px;
+}
+
+.result-box span{
+    color:#727a83;
+    font-size:.78rem;
+}
+
+.result-box strong{
+    display:block;
+    margin-top:5px;
+    font-size:1.3rem;
+}
+
+.explanation{
+    max-width:760px;
+    margin:20px auto;
+    padding:17px;
+    background:#fff8dc;
+    border-radius:15px;
+    text-align:left;
+    line-height:1.55;
+}
+
+.route-chip{
+    display:inline-block;
+    margin:3px;
+    padding:6px 8px;
+    border-radius:8px;
+    background:#f0f2f4;
+    font-size:.8rem;
+    font-weight:800;
+}
+
+/* =========================================================
+   MODAL
+   ========================================================= */
+
+.modal{
+    position:fixed;
+    inset:0;
+    z-index:100;
+    display:grid;
+    place-items:center;
+    padding:18px;
+    background:rgba(20,24,28,.62);
+}
+
+.modal-box{
+    width:min(470px,100%);
+    background:#fff;
+    padding:25px;
+    border-radius:22px;
+    box-shadow:0 25px 70px rgba(0,0,0,.3);
+}
+
+.modal-box h3{
+    margin-top:0;
+}
+
+.modal-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:9px;
+    margin-top:20px;
+}
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+
+.toast{
+    position:fixed;
+    z-index:200;
+    right:18px;
+    bottom:18px;
+    max-width:330px;
+    padding:13px 16px;
+    border-radius:12px;
+    background:#20242a;
+    color:#fff;
+    box-shadow:var(--sombra);
+    transform:translateY(130px);
+    transition:.3s;
+}
+
+.toast.show{
+    transform:translateY(0);
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media(max-width:1050px){
+
+    .level-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .game-grid{
+        grid-template-columns:1fr;
+    }
+
+}
+
+@media(max-width:620px){
+
+    .topbar{
+        padding:9px 12px;
+    }
+
+    .brand-subtitle{
+        display:none;
+    }
+
+    main{
+        width:94%;
+        padding-top:18px;
+    }
+
+    .hero-card{
+        padding:30px 17px;
+        border-radius:23px;
+    }
+
+    .hero-logo{
+        width:125px;
+        height:125px;
+    }
+
+    .hero h1{
+        letter-spacing:-2px;
+    }
+
+    .level-grid{
+        grid-template-columns:1fr;
+    }
+
+    .game-card,
+    .side-card{
+        padding:13px;
+    }
+
+    .game-header{
+        display:block;
+    }
+
+    .badges{
+        justify-content:flex-start;
+        margin-top:10px;
+    }
+
+    .result-grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .screen-title{
+        display:block;
+    }
+
+}
+
+@media(prefers-reduced-motion:reduce){
+
+    *{
+        transition:none !important;
+        animation:none !important;
+        scroll-behavior:auto !important;
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- =========================================================
+     BARRA SUPERIOR
+     ========================================================= -->
+
+<header class="topbar">
+
+    <div class="brand">
+        <img
+            class="brand-logo"
+            src="ESCUDO_GABO.jpg"
+            alt="Escudo del Colegio GABO"
+        >
+
+        <div>
+            <div class="brand-title">GABO GRAPH QUEST</div>
+            <span class="brand-subtitle">
+                Grafos y movilidad · Colegio GABO
+            </span>
+        </div>
+
+    </div>
+
+    <div class="top-actions">
+
+        <button
+            class="icon-button"
+            id="soundButton"
+            title="Activar o desactivar sonido"
+        >
+            🔊
+        </button>
+
+        <button
+            class="small-button hidden"
+            id="menuButton"
+        >
+            ☰ Niveles
+        </button>
+
+    </div>
+
+</header>
+
+
+<main>
+
+<!-- =========================================================
+     PANTALLA DE INICIO
+     ========================================================= -->
+
+<section id="homeScreen" class="hero">
+
+    <div class="hero-card">
+
+        <img
+            class="hero-logo"
+            src="ESCUDO_GABO.jpg"
+            alt="Escudo Colegio GABO"
+        >
+
+        <div class="kicker">
+            MISIÓN EDUCATIVA · GRADO 11
+        </div>
+
+        <h1>
+            GABO
+            <span>GRAPH</span>
+            <br>
+            QUEST
+        </h1>
+
+        <p class="hero-description">
+            Explora diferentes lugares del Colegio GABO,
+            aprende teoría de grafos y resuelve desafíos
+            relacionados con la movilidad escolar.
+        </p>
+
+        <div class="hero-stats">
+
+            <div class="stat">
+                🧩 5 niveles
+            </div>
+
+            <div class="stat">
+                🗺️ Grafos interactivos
+            </div>
+
+            <div class="stat">
+                ⭐ Sistema de estrellas
+            </div>
+
+            <div class="stat">
+                🧠 Conocimiento
+            </div>
+
+        </div>
+
+        <button
+            class="primary-button"
+            id="startButton"
+        >
+            🚀 COMENZAR MISIÓN
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     MENÚ DE NIVELES
+     ========================================================= -->
+
+<section id="levelsScreen" class="hidden">
+
+    <div class="screen-title">
+
+        <div>
+
+            <h2>
+                🎮 Selecciona tu nivel
+            </h2>
+
+            <p>
+                Completa los niveles para desbloquear los siguientes.
+            </p>
+
+        </div>
+
+        <button
+            class="danger-button"
+            id="resetProgressButton"
+        >
+            Reiniciar progreso
+        </button>
+
+    </div>
+
+    <div
+        class="level-grid"
+        id="levelGrid"
+    ></div>
+
+</section>
+
+
+<!-- =========================================================
+     PANTALLA DEL JUEGO
+     ========================================================= -->
+
+<section id="gameScreen" class="hidden">
+
+    <div class="progress-card">
+
+        <div class="progress-header">
+
+            <span id="progressLabel">
+                Nivel
+            </span>
+
+            <span id="progressText">
+                0%
+            </span>
+
+        </div>
+
+        <div class="progress-track">
+
+            <div
+                class="progress-fill"
+                id="progressFill"
+            ></div>
+
+        </div>
+
+    </div>
+
+
+    <div class="game-grid">
+
+        <div class="game-card">
+
+            <div class="game-header">
+
+                <div>
+
+                    <h2 id="levelTitle">
+                        Nivel
+                    </h2>
+
+                    <p id="levelSubtitle">
+                        Objetivo
+                    </p>
+
+                </div>
+
+                <div class="badges">
+
+                    <div
+                        class="badge red"
+                        id="levelBadge"
+                    >
+                        NIVEL
+                    </div>
+
+                    <div
+                        class="badge gold"
+                        id="objectiveBadge"
+                    >
+                        OBJETIVO
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="canvas-container">
+
+                <canvas
+                    id="graphCanvas"
+                    width="900"
+                    height="570"
+                ></canvas>
+
+                <div class="canvas-help">
+                    🖱️ Haz clic sobre los nodos · 📱 Toca la pantalla
+                </div>
+
+            </div>
+
+
+            <div
+                id="quizArea"
+                class="quiz hidden"
+            ></div>
+
+        </div>
+
+
+        <aside class="side-card">
+
+            <h3>
+                🎯 Objetivo
+            </h3>
+
+            <div
+                class="objective"
+                id="objectiveText"
+            >
+                Objetivo del nivel.
+            </div>
+
+
+            <div class="stats-grid">
+
+                <div class="game-stat">
+
+                    <span>
+                        Puntos
+                    </span>
+
+                    <strong id="scoreValue">
+                        0
+                    </strong>
+
+                </div>
+
+
+                <div class="game-stat">
+
+                    <span>
+                        Intentos
+                    </span>
+
+                    <strong id="attemptsValue">
+                        5
+                    </strong>
+
+                </div>
+
+
+                <div class="game-stat">
+
+                    <span>
+                        Movimientos
+                    </span>
+
+                    <strong id="movesValue">
+                        0
+                    </strong>
+
+                </div>
+
+
+                <div class="game-stat">
+
+                    <span>
+                        Estrellas
+                    </span>
+
+                    <strong
+                        id="starsValue"
+                        class="stars"
+                    >
+                        ★★★
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="message"
+                class="message info"
+            >
+                Selecciona un nodo para comenzar.
+            </div>
+
+
+            <h3>
+                📌 Información
+            </h3>
+
+            <ul
+                class="info-list"
+                id="infoList"
+            ></ul>
+
+
+            <div class="controls">
+
+                <button
+                    class="small-button"
+                    id="restartLevelButton"
+                >
+                    🔄 Reiniciar nivel
+                </button>
+
+                <button
+                    class="small-button"
+                    id="levelsButton"
+                >
+                    ☰ Niveles
+                </button>
+
+            </div>
+
+        </aside>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     PANTALLA DE NIVEL COMPLETADO
+     ========================================================= -->
+
+<section
+    id="completeScreen"
+    class="hidden"
+>
+
+    <div class="result-screen">
+
+        <div class="result-icon">
+            🎉
+        </div>
+
+        <h2 id="completeTitle">
+            ¡Nivel completado!
+        </h2>
+
+        <p id="completeText">
+            Excelente trabajo.
+        </p>
+
+
+        <div class="result-grid">
+
+            <div class="result-box">
+
+                <span>
+                    Puntos
+                </span>
+
+                <strong id="completePoints">
+                    0
+                </strong>
+
+            </div>
+
+
+            <div class="result-box">
+
+                <span>
+                    Estrellas
+                </span>
+
+                <strong id="completeStars">
+                    ★★★
+                </strong>
+
+            </div>
+
+
+            <div class="result-box">
+
+                <span>
+                    Movimientos
+                </span>
+
+                <strong id="completeMoves">
+                    0
+                </strong>
+
+            </div>
+
+
+            <div class="result-box">
+
+                <span>
+                    Intentos
+                </span>
+
+                <strong id="completeAttempts">
+                    0
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="explanation"
+            id="completeExplanation"
+        ></div>
+
+
+        <button
+            class="primary-button"
+            id="nextLevelButton"
+        >
+            Siguiente nivel →
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     PANTALLA FINAL
+     ========================================================= -->
+
+<section
+    id="finalScreen"
+    class="hidden"
+>
+
+    <div class="result-screen">
+
+        <div class="result-icon">
+            🏆
+        </div>
+
+        <h2>
+            ¡MISIÓN GABO COMPLETADA!
+        </h2>
+
+        <p>
+            Has completado los cinco niveles de
+            GABO GRAPH QUEST.
+        </p>
+
+
+        <div class="result-grid">
+
+            <div class="result-box">
+
+                <span>
+                    Puntuación final
+                </span>
+
+                <strong id="finalPoints">
+                    0
+                </strong>
+
+            </div>
+
+
+            <div class="result-box">
+
+                <span>
+                    Estrellas
+                </span>
+
+                <strong id="finalStars">
+                    ★
+                </strong>
+
+            </div>
+
+
+            <div class="result-box">
+
+                <span>
+                    Movimientos
+                </span>
+
+                <strong id="finalMoves">
+                    0
+                </strong>
+
+            </div>
+
+
+            <div class="result-box">
+
+                <span>
+                    Niveles
+                </span>
+
+                <strong>
+                    5/5
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="explanation">
+
+            <strong>
+                🧠 Lo que aprendiste
+            </strong>
+
+            <p>
+                Los grafos permiten representar conexiones
+                entre diferentes lugares y encontrar rutas
+                eficientes para resolver problemas reales
+                de movilidad.
+            </p>
+
+            <p>
+                Aprendiste a trabajar con nodos, aristas,
+                vecinos, caminos, pesos, rutas y caminos
+                mínimos.
+            </p>
+
+        </div>
+
+
+        <button
+            class="primary-button"
+            id="playAgainButton"
+        >
+            🔁 Jugar nuevamente
+        </button>
+
+    </div>
+
+</section>
+
+</main>
+
+
+<!-- =========================================================
+     MODAL DE CONFIRMACIÓN
+     ========================================================= -->
+
+<div
+    class="modal hidden"
+    id="confirmModal"
+>
+
+    <div class="modal-box">
+
+        <h3 id="modalTitle">
+            ¿Reiniciar progreso?
+        </h3>
+
+        <p id="modalText">
+            Esta acción eliminará tu progreso.
+        </p>
+
+        <div class="modal-actions">
+
+            <button
+                class="small-button"
+                id="cancelModalButton"
+            >
+                Cancelar
+            </button>
+
+            <button
+                class="danger-button"
+                id="confirmModalButton"
+            >
+                Sí, reiniciar
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div
+    class="toast"
+    id="toast"
+></div>
+
+
+<script>
+
+/* =========================================================
+   CONFIGURACIÓN
+   ========================================================= */
+
+const STORAGE_KEY = "gabo_graph_quest_v1";
+
+const TOTAL_NIVELES = 5;
+
+const canvas = document.getElementById("graphCanvas");
+
+const ctx = canvas.getContext("2d");
+
+
+/* =========================================================
+   ESTADO DEL JUEGO
+   ========================================================= */
+
+let estado = cargarEstado();
+
+let juego = {
+    nivel:1,
+    nodos:[],
+    aristas:[],
+    ruta:[],
+    actual:null,
+    inicio:null,
+    meta:null,
+    costo:0,
+    movimientos:0,
+    intentos:5,
+    pregunta:0,
+    correctas:0,
+    congestion:new Set(),
+    finalizando:false
+};
+
+
+/* =========================================================
+   DATOS DE LOS NIVELES
+   ========================================================= */
+
+const niveles = [
+
+    {
+        titulo:"Conociendo el grafo",
+        subtitulo:"Aprende a identificar nodos, aristas y vecinos.",
+        objetivo:"Identifica conceptos básicos de teoría de grafos.",
+        inicio:"entrada",
+        meta:"biblioteca",
+        explicacion:"Un grafo está formado por nodos y conexiones llamadas aristas."
+    },
+
+    {
+        titulo:"Encuentra la ruta",
+        subtitulo:"Desplázate entre lugares conectados.",
+        objetivo:"Llegar desde la Entrada hasta la Biblioteca siguiendo conexiones válidas.",
+        inicio:"entrada",
+        meta:"biblioteca",
+        explicacion:"Un camino es una secuencia de nodos conectados."
+    },
+
+    {
+        titulo:"La ruta más corta",
+        subtitulo:"Encuentra el menor costo posible.",
+        objetivo:"Encuentra la ruta más corta desde la Entrada hasta la Biblioteca.",
+        inicio:"entrada",
+        meta:"biblioteca",
+        explicacion:"El camino más corto busca minimizar el costo total entre dos nodos."
+    },
+
+    {
+        titulo:"Movilidad inteligente",
+        subtitulo:"Evita las zonas congestionadas.",
+        objetivo:"Llega a la Cafetería evitando conexiones congestionadas.",
+        inicio:"entrada",
+        meta:"cafeteria",
+        explicacion:"Los pesos pueden representar distancia, tiempo o congestión."
+    },
+
+    {
+        titulo:"Misión final GABO",
+        subtitulo:"Planifica una ruta eficiente.",
+        objetivo:"Visita Biblioteca y Laboratorio y termina en el Punto de encuentro.",
+        inicio:"entrada",
+        meta:"encuentro",
+        obligatorios:["biblioteca","laboratorio"],
+        maxMovimientos:9,
+        explicacion:"Los grafos permiten modelar problemas reales de movilidad y buscar soluciones eficientes."
+    }
+
+];
+
+
+/* =========================================================
+   PREGUNTAS DEL NIVEL 1
+   ========================================================= */
+
+const preguntasNivel1 = [
+
+    {
+        pregunta:"¿Qué representa un lugar como la Biblioteca dentro del grafo?",
+        opciones:[
+            "Una arista",
+            "Un nodo",
+            "Un peso",
+            "Una dirección"
+        ],
+        correcta:1,
+        explicacion:"La Biblioteca es un lugar del mapa, por eso se representa mediante un nodo."
+    },
+
+    {
+        pregunta:"¿Qué representa una conexión entre Entrada y Patio?",
+        opciones:[
+            "Un nodo",
+            "Una arista",
+            "Un jugador",
+            "Una estrella"
+        ],
+        correcta:1,
+        explicacion:"Una arista representa la conexión entre dos nodos."
+    },
+
+    {
+        pregunta:"Si Patio está conectado directamente con Cancha, ¿qué relación tienen?",
+        opciones:[
+            "Son vecinos",
+            "Son pesos",
+            "Son rutas finales",
+            "Son obstáculos"
+        ],
+        correcta:0,
+        explicacion:"Dos nodos conectados directamente se consideran vecinos."
+    },
+
+    {
+        pregunta:"¿Cuál de estos puede ser un nodo?",
+        opciones:[
+            "Biblioteca",
+            "La línea entre dos lugares",
+            "El costo",
+            "La distancia"
+        ],
+        correcta:0,
+        explicacion:"Los lugares del colegio se representan como nodos."
+    },
+
+    {
+        pregunta:"¿Qué elemento conecta dos nodos?",
+        opciones:[
+            "Una arista",
+            "Una estrella",
+            "Un intento",
+            "Una pregunta"
+        ],
+        correcta:0,
+        explicacion:"La arista es la conexión que une dos nodos."
+    }
+
+];
+
+
+/* =========================================================
+   CREAR GRAFO
+   ========================================================= */
+
+function crearGrafo(nivel){
+
+    const posiciones = {
+
+        entrada:{x:100,y:285,nombre:"Entrada",icono:"🏫"},
+        porteria:{x:250,y:120,nombre:"Portería",icono:"🚪"},
+        patio:{x:400,y:285,nombre:"Patio",icono:"🌳"},
+        cancha:{x:250,y:450,nombre:"Cancha",icono:"⚽"},
+        cafeteria:{x:560,y:130,nombre:"Cafetería",icono:"🍎"},
+        biblioteca:{x:560,y:285,nombre:"Biblioteca",icono:"📚"},
+        informatica:{x:740,y:130,nombre:"Informática",icono:"💻"},
+        laboratorio:{x:740,y:430,nombre:"Laboratorio",icono:"🔬"},
+        salones:{x:400,y:470,nombre:"Salones",icono:"🏫"},
+        coordinacion:{x:100,y:120,nombre:"Coordinación",icono:"📋"},
+        encuentro:{x:830,y:285,nombre:"Encuentro",icono:"📍"}
+
+    };
+
+    juego.nodos = Object.keys(posiciones).map(id => ({
+        id:id,
+        ...posiciones[id]
+    }));
+
+
+    const base = [
+
+        ["entrada","porteria",2],
+        ["entrada","patio",2],
+        ["entrada","cancha",5],
+        ["entrada","coordinacion",2],
+
+        ["porteria","patio",2],
+        ["porteria","coordinacion",2],
+
+        ["patio","biblioteca",3],
+        ["patio","cancha",2],
+        ["patio","cafeteria",4],
+        ["patio","salones",2],
+
+        ["cancha","salones",2],
+        ["cancha","biblioteca",1],
+
+        ["biblioteca","cafeteria",2],
+        ["biblioteca","informatica",2],
+        ["biblioteca","laboratorio",4],
+
+        ["cafeteria","informatica",2],
+
+        ["informatica","laboratorio",3],
+        ["informatica","encuentro",3],
+
+        ["laboratorio","encuentro",2],
+        ["laboratorio","salones",2],
+
+        ["salones","encuentro",3]
+
+    ];
+
+
+    juego.aristas = base.map(([a,b,peso]) => ({
+        a:a,
+        b:b,
+        peso:peso,
+        bloqueada:false
+    }));
+
+
+    juego.ruta = [];
+    juego.costo = 0;
+    juego.movimientos = 0;
+    juego.intentos = nivel === 1 ? 5 : nivel === 5 ? 3 : 5;
+    juego.pregunta = 0;
+    juego.correctas = 0;
+    juego.congestion = new Set();
+    juego.finalizando = false;
+
+    juego.inicio = niveles[nivel-1].inicio;
+    juego.meta = niveles[nivel-1].meta;
+    juego.actual = juego.inicio;
+
+    dibujarGrafo();
+}
+
+
+/* =========================================================
+   CLAVE DE ARISTA
+   ========================================================= */
+
+function claveArista(a,b){
+
+    return [a,b].sort().join("|");
+
+}
+
+
+/* =========================================================
+   BUSCAR NODO
+   ========================================================= */
+
+function nodoPorId(id){
+
+    return juego.nodos.find(n => n.id === id);
+
+}
+
+
+/* =========================================================
+   BUSCAR ARISTA
+   ========================================================= */
+
+function buscarArista(a,b){
+
+    return juego.aristas.find(arista =>
+        (arista.a === a && arista.b === b) ||
+        (arista.a === b && arista.b === a)
+    );
+
+}
+
+
+/* =========================================================
+   VALIDAR MOVIMIENTO
+   ========================================================= */
+
+function validarMovimiento(desde,hasta){
+
+    const arista = buscarArista(desde,hasta);
+
+    if(!arista){
+        return {
+            valido:false,
+            razon:"No existe una conexión directa entre estos lugares."
+        };
+    }
+
+    const clave = claveArista(desde,hasta);
+
+    if(juego.congestion.has(clave)){
+        return {
+            valido:false,
+            razon:"🚦 Esta conexión está congestionada. Busca otra alternativa."
+        };
+    }
+
+    return {
+        valido:true,
+        arista:arista
+    };
+
+}
+
+
+/* =========================================================
+   SELECCIONAR NODO
+   ========================================================= */
+
+function seleccionarNodo(id){
+
+    if(juego.finalizando){
+        return;
+    }
+
+    /* =====================================================
+       NIVEL 1
+       ===================================================== */
+
+    if(juego.nivel === 1){
+
+        const nodo = nodoPorId(id);
+
+        const vecinos = juego.aristas
+            .filter(arista =>
+                arista.a === id ||
+                arista.b === id
+            )
+            .map(arista =>
+                arista.a === id
+                    ? arista.b
+                    : arista.a
+            );
+
+        mensaje(
+            `${nodo.icono} ${nodo.nombre} es un nodo. ` +
+            `Sus vecinos son: ` +
+            vecinos
+                .map(vecino => nodoPorId(vecino).nombre)
+                .join(", ") +
+            ".",
+            "info"
+        );
+
+        dibujarGrafo(id);
+
+        return;
+    }
+
+
+    /* =====================================================
+       PRIMER MOVIMIENTO
+       ===================================================== */
+
+    /*
+       El jugador debe seleccionar primero el nodo de inicio.
+       Antes el programa intentaba validar:
+
+       Entrada → Entrada
+
+       y por eso aparecía "movimiento no válido".
+
+       Ahora el primer clic simplemente inicia la ruta.
+    */
+
+    if(juego.ruta.length === 0){
+
+        if(id !== juego.inicio){
+
+            mensaje(
+                `🟢 Debes comenzar en ` +
+                `${nodoPorId(juego.inicio).nombre}.`,
+                "error"
+            );
+
+            sonido("error");
+
+            return;
+        }
+
+
+        /* Guardamos el nodo inicial */
+
+        juego.ruta = [juego.inicio];
+
+        juego.actual = juego.inicio;
+
+        juego.movimientos = 0;
+
+        juego.costo = 0;
+
+
+        mensaje(
+            `🚀 ¡Ruta iniciada! Ahora selecciona un nodo ` +
+            `conectado directamente con ${nodoPorId(juego.inicio).nombre}.`,
+            "success"
+        );
+
+
+        sonido("select");
+
+        dibujarGrafo();
+
+        actualizarPanel();
+
+        return;
+    }
+
+
+    /* =====================================================
+       EVITAR HACER CLIC EN EL MISMO NODO
+       ===================================================== */
+
+    if(id === juego.actual){
+
+        mensaje(
+            "📍 Ya estás en este lugar. Selecciona otro nodo conectado.",
+            "info"
+        );
+
+        return;
+    }
+
+
+    /* =====================================================
+       VALIDAR LA CONEXIÓN
+       ===================================================== */
+
+    const movimiento =
+        validarMovimiento(
+            juego.actual,
+            id
+        );
+
+
+    /* =====================================================
+       MOVIMIENTO NO VÁLIDO
+       ===================================================== */
+
+    if(!movimiento.valido){
+
+        juego.intentos--;
+
+        estado.puntos =
+            Math.max(
+                0,
+                estado.puntos - 25
+            );
+
+
+        mensaje(
+            `❌ ${movimiento.razon}`,
+            "error"
+        );
+
+
+        sonido("error");
+
+        actualizarPanel();
+
+        comprobarIntentos();
+
+        return;
+    }
+
+
+    /* =====================================================
+       MOVIMIENTO VÁLIDO
+       ===================================================== */
+
+    juego.actual = id;
+
+    juego.ruta.push(id);
+
+    juego.movimientos++;
+
+    juego.costo += movimiento.arista.peso;
+
+
+    /* Puntos por movimiento correcto */
+
+    estado.puntos += 20;
+
+
+    mensaje(
+        `✅ Te moviste a ${nodoPorId(id).nombre}.`,
+        "success"
+    );
+
+
+    sonido("select");
+
+
+    /* Dibujar la nueva ruta */
+
+    dibujarGrafo();
+
+
+    /* Actualizar estadísticas */
+
+    actualizarPanel();
+
+
+    /* Revisar si completó el objetivo */
+
+    comprobarObjetivo();
+
+}function seleccionarNodo(id){
+
+    if(juego.finalizando){
+        return;
+    }
+
+    /* =====================================================
+       NIVEL 1
+       ===================================================== */
+
+    if(juego.nivel === 1){
+
+        const nodo = nodoPorId(id);
+
+        const vecinos = juego.aristas
+            .filter(arista =>
+                arista.a === id ||
+                arista.b === id
+            )
+            .map(arista =>
+                arista.a === id
+                    ? arista.b
+                    : arista.a
+            );
+
+        mensaje(
+            `${nodo.icono} ${nodo.nombre} es un nodo. ` +
+            `Sus vecinos son: ` +
+            vecinos
+                .map(vecino => nodoPorId(vecino).nombre)
+                .join(", ") +
+            ".",
+            "info"
+        );
+
+        dibujarGrafo(id);
+
+        return;
+    }
+
+
+    /* =====================================================
+       PRIMER MOVIMIENTO
+       ===================================================== */
+
+    /*
+       El jugador debe seleccionar primero el nodo de inicio.
+       Antes el programa intentaba validar:
+
+       Entrada → Entrada
+
+       y por eso aparecía "movimiento no válido".
+
+       Ahora el primer clic simplemente inicia la ruta.
+    */
+
+    if(juego.ruta.length === 0){
+
+        if(id !== juego.inicio){
+
+            mensaje(
+                `🟢 Debes comenzar en ` +
+                `${nodoPorId(juego.inicio).nombre}.`,
+                "error"
+            );
+
+            sonido("error");
+
+            return;
+        }
+
+
+        /* Guardamos el nodo inicial */
+
+        juego.ruta = [juego.inicio];
+
+        juego.actual = juego.inicio;
+
+        juego.movimientos = 0;
+
+        juego.costo = 0;
+
+
+        mensaje(
+            `🚀 ¡Ruta iniciada! Ahora selecciona un nodo ` +
+            `conectado directamente con ${nodoPorId(juego.inicio).nombre}.`,
+            "success"
+        );
+
+
+        sonido("select");
+
+        dibujarGrafo();
+
+        actualizarPanel();
+
+        return;
+    }
+
+
+    /* =====================================================
+       EVITAR HACER CLIC EN EL MISMO NODO
+       ===================================================== */
+
+    if(id === juego.actual){
+
+        mensaje(
+            "📍 Ya estás en este lugar. Selecciona otro nodo conectado.",
+            "info"
+        );
+
+        return;
+    }
+
+
+    /* =====================================================
+       VALIDAR LA CONEXIÓN
+       ===================================================== */
+
+    const movimiento =
+        validarMovimiento(
+            juego.actual,
+            id
+        );
+
+
+    /* =====================================================
+       MOVIMIENTO NO VÁLIDO
+       ===================================================== */
+
+    if(!movimiento.valido){
+
+        juego.intentos--;
+
+        estado.puntos =
+            Math.max(
+                0,
+                estado.puntos - 25
+            );
+
+
+        mensaje(
+            `❌ ${movimiento.razon}`,
+            "error"
+        );
+
+
+        sonido("error");
+
+        actualizarPanel();
+
+        comprobarIntentos();
+
+        return;
+    }
+
+
+    /* =====================================================
+       MOVIMIENTO VÁLIDO
+       ===================================================== */
+
+    juego.actual = id;
+
+    juego.ruta.push(id);
+
+    juego.movimientos++;
+
+    juego.costo += movimiento.arista.peso;
+
+
+    /* Puntos por movimiento correcto */
+
+    estado.puntos += 20;
+
+
+    mensaje(
+        `✅ Te moviste a ${nodoPorId(id).nombre}.`,
+        "success"
+    );
+
+
+    sonido("select");
+
+
+    /* Dibujar la nueva ruta */
+
+    dibujarGrafo();
+
+
+    /* Actualizar estadísticas */
+
+    actualizarPanel();
+
+
+    /* Revisar si completó el objetivo */
+
+    comprobarObjetivo();
+
+}
+
+
+/* =========================================================
+   CALCULAR RUTA MÁS CORTA — DIJKSTRA
+   ========================================================= */
+
+function dijkstra(inicio,fin){
+
+    const distancias = {};
+    const anteriores = {};
+    const visitados = new Set();
+
+    juego.nodos.forEach(nodo => {
+        distancias[nodo.id] = Infinity;
+        anteriores[nodo.id] = null;
+    });
+
+    distancias[inicio] = 0;
+
+
+    while(visitados.size < juego.nodos.length){
+
+        let actual = null;
+
+        for(const nodo of juego.nodos){
+
+            if(
+                !visitados.has(nodo.id) &&
+                (actual === null ||
+                distancias[nodo.id] < distancias[actual])
+            ){
+                actual = nodo.id;
+            }
+
+        }
+
+
+        if(actual === null){
+            break;
+        }
+
+
+        if(distancias[actual] === Infinity){
+            break;
+        }
+
+
+        visitados.add(actual);
+
+
+        for(const arista of juego.aristas){
+
+            let vecino = null;
+
+            if(arista.a === actual){
+                vecino = arista.b;
+            }
+
+            if(arista.b === actual){
+                vecino = arista.a;
+            }
+
+            if(!vecino){
+                continue;
+            }
+
+
+            const nuevaDistancia =
+                distancias[actual] + arista.peso;
+
+
+            if(nuevaDistancia < distancias[vecino]){
+
+                distancias[vecino] = nuevaDistancia;
+
+                anteriores[vecino] = actual;
+
+            }
+
+        }
+
+    }
+
+
+    const ruta = [];
+
+    let actual = fin;
+
+
+    while(actual !== null){
+
+        ruta.unshift(actual);
+
+        actual = anteriores[actual];
+
+    }
+
+
+    return {
+        ruta:ruta,
+        costo:distancias[fin]
+    };
+
+}
+
+
+/* =========================================================
+   CALCULAR COSTO DE UNA RUTA
+   ========================================================= */
+
+function calcularCosto(ruta){
+
+    let costo = 0;
+
+    for(let i=0;i<ruta.length-1;i++){
+
+        const arista = buscarArista(
+            ruta[i],
+            ruta[i+1]
+        );
+
+        if(arista){
+            costo += arista.peso;
+        }
+
+    }
+
+    return costo;
+
+}
+
+
+/* =========================================================
+   COMPROBAR OBJETIVO
+   ========================================================= */
+
+function comprobarObjetivo(){
+
+    const data = niveles[juego.nivel-1];
+
+
+    if(juego.nivel === 2){
+
+        if(juego.actual === data.meta){
+
+            estado.puntos += 200;
+
+            mensaje(
+                "🎉 ¡Ruta encontrada! Llegaste correctamente a la Biblioteca.",
+                "success"
+            );
+
+            completarNivel();
+
+        }
+
+        return;
+    }
+
+
+    if(juego.nivel === 3){
+
+        if(juego.actual === data.meta){
+
+            const optimo =
+                dijkstra(data.inicio,data.meta);
+
+            if(juego.costo === optimo.costo){
+
+                estado.puntos += 300;
+
+                mensaje(
+                    `🏆 ¡Excelente! Encontraste la ruta más corta. ` +
+                    `Costo: ${juego.costo}.`,
+                    "success"
+                );
+
+                completarNivel();
+
+            }else{
+
+                mensaje(
+                    `La ruta es válida, pero existe una mejor. ` +
+                    `Tu costo: ${juego.costo}. ` +
+                    `Costo mínimo: ${optimo.costo}.`,
+                    "error"
+                );
+
+            }
+
+        }
+
+        return;
+    }
+
+
+    if(juego.nivel === 4){
+
+        if(juego.actual === data.meta){
+
+            const rutaOptima = dijkstra(
+                data.inicio,
+                data.meta
+            );
+
+            if(juego.costo <= rutaOptima.costo + 3){
+
+                estado.puntos += 300;
+
+                mensaje(
+                    "🚀 ¡Llegaste a la Cafetería con una ruta eficiente!",
+                    "success"
+                );
+
+                completarNivel();
+
+            }else{
+
+                mensaje(
+                    `Llegaste, pero tu ruta tuvo un costo de ${juego.costo}. ` +
+                    `Existe una alternativa más eficiente.`,
+                    "error"
+                );
+
+            }
+
+        }
+
+        return;
+    }
+
+
+    if(juego.nivel === 5){
+
+        const obligatorios =
+            data.obligatorios.every(
+                id => juego.ruta.includes(id)
+            );
+
+
+        if(juego.actual === data.meta){
+
+            if(
+                obligatorios &&
+                juego.movimientos <= data.maxMovimientos
+            ){
+
+                estado.puntos += 500;
+
+                mensaje(
+                    "🏆 ¡MISIÓN GABO COMPLETADA!",
+                    "success"
+                );
+
+                completarNivel();
+
+            }else if(!obligatorios){
+
+                mensaje(
+                    "Llegaste al final, pero todavía debes visitar " +
+                    "la Biblioteca y el Laboratorio.",
+                    "error"
+                );
+
+            }else{
+
+                mensaje(
+                    "Llegaste al final, pero superaste el límite " +
+                    "de movimientos.",
+                    "error"
+                );
+
+            }
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   COMPROBAR INTENTOS
+   ========================================================= */
+
+function comprobarIntentos(){
+
+    if(juego.intentos <= 0){
+
+        juego.finalizando = true;
+
+        mensaje(
+            "❌ Te quedaste sin intentos. Reinicia el nivel e inténtalo nuevamente.",
+            "error"
+        );
+
+        document.getElementById(
+            "restartLevelButton"
+        ).classList.add("primary-button");
+
+    }
+
+}
+
+
+/* =========================================================
+   DIBUJAR GRAFO
+   ========================================================= */
+
+function dibujarGrafo(seleccionado=null){
+
+    ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+
+    /* Fondo */
+
+    ctx.fillStyle = "#f4f7f9";
+
+    ctx.fillRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+
+    /* Líneas de cuadrícula */
+
+    ctx.strokeStyle = "rgba(120,130,140,.08)";
+    ctx.lineWidth = 1;
+
+    for(let x=0;x<canvas.width;x+=45){
+
+        ctx.beginPath();
+        ctx.moveTo(x,0);
+        ctx.lineTo(x,canvas.height);
+        ctx.stroke();
+
+    }
+
+    for(let y=0;y<canvas.height;y+=45){
+
+        ctx.beginPath();
+        ctx.moveTo(0,y);
+        ctx.lineTo(canvas.width,y);
+        ctx.stroke();
+
+    }
+
+
+    /* Aristas */
+
+    juego.aristas.forEach(arista => {
+
+        const a = nodoPorId(arista.a);
+        const b = nodoPorId(arista.b);
+
+        if(!a || !b){
+            return;
+        }
+
+
+        const clave =
+            claveArista(arista.a,arista.b);
+
+        const congestionada =
+            juego.congestion.has(clave);
+
+        const seleccionada =
+            juego.ruta.includes(arista.a) &&
+            juego.ruta.includes(arista.b) &&
+            Math.abs(
+                juego.ruta.indexOf(arista.a) -
+                juego.ruta.indexOf(arista.b)
+            ) === 1;
+
+
+        ctx.beginPath();
+
+        ctx.moveTo(a.x,a.y);
+
+        ctx.lineTo(b.x,b.y);
+
+
+        if(congestionada){
+
+            ctx.strokeStyle = "#c9252d";
+            ctx.lineWidth = 8;
+
+        }else if(seleccionada){
+
+            ctx.strokeStyle = "#f5c400";
+            ctx.lineWidth = 8;
+
+        }else{
+
+            ctx.strokeStyle = "#aeb7bf";
+            ctx.lineWidth = 4;
+
+        }
+
+
+        ctx.stroke();
+
+
+        /* Peso */
+
+        if(juego.nivel >= 3){
+
+            const mx = (a.x+b.x)/2;
+            const my = (a.y+b.y)/2;
+
+            ctx.beginPath();
+
+            ctx.fillStyle =
+                congestionada ?
+                "#ffe4e5" :
+                "#ffffff";
+
+            ctx.arc(
+                mx,
+                my,
+                16,
+                0,
+                Math.PI*2
+            );
+
+            ctx.fill();
+
+            ctx.strokeStyle =
+                congestionada ?
+                "#c9252d" :
+                "#d5dadd";
+
+            ctx.lineWidth=1;
+
+            ctx.stroke();
+
+
+            ctx.fillStyle =
+                congestionada ?
+                "#c9252d" :
+                "#343a40";
+
+            ctx.font =
+                "bold 12px Arial";
+
+            ctx.textAlign="center";
+            ctx.textBaseline="middle";
+
+            ctx.fillText(
+                arista.peso,
+                mx,
+                my
+            );
+
+        }
+
+    });
+
+
+    /* Nodos */
+
+    juego.nodos.forEach(nodo => {
+
+        const esInicio =
+            nodo.id === juego.inicio;
+
+        const esMeta =
+            nodo.id === juego.meta;
+
+        const esActual =
+            nodo.id === juego.actual;
+
+        const esSeleccionado =
+            nodo.id === seleccionado;
+
+
+        let color = "#ffffff";
+
+
+        if(esInicio){
+            color="#eaf8f1";
+        }
+
+        if(esMeta){
+            color="#fff5c9";
+        }
+
+        if(esActual){
+            color="#ffe7e8";
+        }
+
+        if(esSeleccionado){
+            color="#fff0a8";
+        }
+
+
+        ctx.beginPath();
+
+        ctx.arc(
+            nodo.x,
+            nodo.y,
+            35,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fillStyle=color;
+
+        ctx.fill();
+
+
+        ctx.lineWidth =
+            esActual || esSeleccionado ?
+            5 :
+            3;
+
+        ctx.strokeStyle =
+            esActual ?
+            "#c9252d" :
+            esMeta ?
+            "#d4a900" :
+            "#89939d";
+
+        ctx.stroke();
+
+
+        /* Icono */
+
+        ctx.font="24px Arial";
+        ctx.textAlign="center";
+        ctx.textBaseline="middle";
+
+        ctx.fillStyle="#20242a";
+
+        ctx.fillText(
+            nodo.icono,
+            nodo.x,
+            nodo.y-4
+        );
+
+
+        /* Nombre */
+
+        ctx.font="bold 13px Arial";
+
+        ctx.fillStyle="#20242a";
+
+        ctx.fillText(
+            nodo.nombre,
+            nodo.x,
+            nodo.y+57
+        );
+
+
+        /* Identificador */
+
+        ctx.font="10px Arial";
+
+        ctx.fillStyle="#7a828a";
+
+        ctx.fillText(
+            nodo.id,
+            nodo.x,
+            nodo.y+71
+        );
+
+    });
+
+
+    /* Inicio / Meta */
+
+    ctx.font="bold 11px Arial";
+
+    juego.nodos.forEach(nodo => {
+
+        if(nodo.id === juego.inicio){
+
+            ctx.fillStyle="#1f9d63";
+
+            ctx.fillText(
+                "INICIO",
+                nodo.x,
+                nodo.y-49
+            );
+
+        }
+
+        if(nodo.id === juego.meta){
+
+            ctx.fillStyle="#a47d00";
+
+            ctx.fillText(
+                "META",
+                nodo.x,
+                nodo.y-49
+            );
+
+        }
+
+    });
+
+}
+
+
+/* =========================================================
+   DETECTAR NODO CON CLICK / TOQUE
+   ========================================================= */
+
+function detectarNodo(evento){
+
+    const rect =
+        canvas.getBoundingClientRect();
+
+
+    const escalaX =
+        canvas.width / rect.width;
+
+    const escalaY =
+        canvas.height / rect.height;
+
+
+    const x =
+        (evento.clientX - rect.left) *
+        escalaX;
+
+    const y =
+        (evento.clientY - rect.top) *
+        escalaY;
+
+
+    for(const nodo of juego.nodos){
+
+        const distancia =
+            Math.sqrt(
+                (x-nodo.x)**2 +
+                (y-nodo.y)**2
+            );
+
+
+        if(distancia <= 40){
+
+            seleccionarNodo(nodo.id);
+
+            return;
+        }
+
+    }
+
+}
+
+
+canvas.addEventListener(
+    "click",
+    detectarNodo
+);
+
+
+canvas.addEventListener(
+    "touchstart",
+    function(evento){
+
+        evento.preventDefault();
+
+        const toque =
+            evento.touches[0];
+
+        detectarNodo(toque);
+
+    },
+    {passive:false}
+);
+
+
+/* =========================================================
+   NIVEL 1 — PREGUNTAS
+   ========================================================= */
+
+function prepararQuiz(){
+
+    const area =
+        document.getElementById("quizArea");
+
+    area.classList.remove("hidden");
+
+    mostrarPregunta();
+
+}
+
+
+function mostrarPregunta(){
+
+    const area =
+        document.getElementById("quizArea");
+
+    const pregunta =
+        preguntasNivel1[juego.pregunta];
+
+
+    area.innerHTML="";
+
+
+    const titulo =
+        document.createElement("div");
+
+    titulo.className="question";
+
+    titulo.innerHTML =
+        `<strong>
+            Pregunta ${juego.pregunta+1} de ${preguntasNivel1.length}
+        </strong>
+        <br>
+        ${pregunta.pregunta}`;
+
+
+    area.appendChild(titulo);
+
+
+    pregunta.opciones.forEach(
+        (opcion,index) => {
+
+            const boton =
+                document.createElement("button");
+
+            boton.className="option";
+
+            boton.textContent=opcion;
+
+            boton.addEventListener(
+                "click",
+                () => responderPregunta(
+                    index,
+                    boton
+                )
+            );
+
+            area.appendChild(boton);
+
+        }
+    );
+
+
+    actualizarPanel();
+
+}
+
+
+function responderPregunta(indice,boton){
+
+    const pregunta =
+        preguntasNivel1[juego.pregunta];
+
+
+    const botones =
+        document.querySelectorAll(
+            ".option"
+        );
+
+
+    botones.forEach(
+        boton => boton.disabled=true
+    );
+
+
+    if(indice === pregunta.correcta){
+
+        boton.classList.add("correct");
+
+        juego.correctas++;
+
+        estado.puntos += 100;
+
+        sonido("correct");
+
+        mensaje(
+            "✅ ¡Correcto! " +
+            pregunta.explicacion,
+            "success"
+        );
+
+
+        setTimeout(
+            () => {
+
+                juego.pregunta++;
+
+
+                if(
+                    juego.pregunta >=
+                    preguntasNivel1.length
+                ){
+
+                    completarNivel();
+
+                }else{
+
+                    mostrarPregunta();
+
+                }
+
+                actualizarPanel();
+
+            },
+            700
+        );
+
+
+    }else{
+
+        boton.classList.add("wrong");
+
+        juego.intentos--;
+
+        estado.puntos =
+            Math.max(
+                0,
+                estado.puntos-25
+            );
+
+        sonido("error");
+
+        mensaje(
+            "❌ No es correcto. " +
+            pregunta.explicacion,
+            "error"
+        );
+
+
+        comprobarIntentos();
+
+
+        setTimeout(
+            () => {
+
+                if(!juego.finalizando){
+
+                    mostrarPregunta();
+
+                }
+
+            },
+            900
+        );
+
+    }
+
+
+    guardarEstado();
+
+    actualizarPanel();
+
+}
+
+
+/* =========================================================
+   EVENTOS DE CONGESTIÓN — NIVEL 4
+   ========================================================= */
+
+function generarCongestion(){
+
+    if(juego.nivel !== 4){
+        return;
+    }
+
+
+    const opciones = [
+
+        ["patio","cafeteria"],
+
+        ["cancha","biblioteca"],
+
+        ["biblioteca","cafeteria"],
+
+        ["informatica","laboratorio"]
+
+    ];
+
+
+    const seleccion =
+        opciones[
+            Math.floor(
+                Math.random()*opciones.length
+            )
+        ];
+
+
+    const clave =
+        claveArista(
+            seleccion[0],
+            seleccion[1]
+        );
+
+
+    if(
+        buscarArista(
+            seleccion[0],
+            seleccion[1]
+        )
+    ){
+
+        juego.congestion.add(clave);
+
+        mensaje(
+            `🚦 ¡Alerta! La conexión entre ` +
+            `${nodoPorId(seleccion[0]).nombre} y ` +
+            `${nodoPorId(seleccion[1]).nombre} ` +
+            `está congestionada.`,
+            "error"
+        );
+
+        sonido("error");
+
+        dibujarGrafo();
+
+    }
+
+}
+
+
+/* =========================================================
+   ESTRELLAS
+   ========================================================= */
+
+function calcularEstrellas(){
+
+    const nivel =
+        juego.nivel;
+
+
+    if(nivel === 1){
+
+        if(juego.correctas === 5){
+            return 3;
+        }
+
+        if(juego.correctas >= 4){
+            return 2;
+        }
+
+        return 1;
+
+    }
+
+
+    if(nivel === 2){
+
+        if(juego.movimientos <= 3){
+            return 3;
+        }
+
+        if(juego.movimientos <= 5){
+            return 2;
+        }
+
+        return 1;
+
+    }
+
+
+    if(nivel === 3){
+
+        const optimo =
+            dijkstra(
+                juego.inicio,
+                juego.meta
+            );
+
+
+        if(
+            juego.costo === optimo.costo &&
+            juego.movimientos <= 4
+        ){
+            return 3;
+        }
+
+        if(
+            juego.costo <= optimo.costo+2
+        ){
+            return 2;
+        }
+
+        return 1;
+
+    }
+
+
+    if(nivel === 4){
+
+        if(juego.movimientos <= 4){
+            return 3;
+        }
+
+        if(juego.movimientos <= 6){
+            return 2;
+        }
+
+        return 1;
+
+    }
+
+
+    if(nivel === 5){
+
+        if(juego.movimientos <= 6){
+            return 3;
+        }
+
+        if(juego.movimientos <= 9){
+            return 2;
+        }
+
+        return 1;
+
+    }
+
+
+    return 1;
+
+}
+
+
+/* =========================================================
+   ACTUALIZAR PANEL
+   ========================================================= */
+
+function actualizarPanel(){
+
+    document.getElementById(
+        "scoreValue"
+    ).textContent =
+        estado.puntos;
+
+
+    document.getElementById(
+        "attemptsValue"
+    ).textContent =
+        juego.intentos;
+
+
+    document.getElementById(
+        "movesValue"
+    ).textContent =
+        juego.movimientos;
+
+
+    const estrellas =
+        calcularEstrellas();
+
+
+    document.getElementById(
+        "starsValue"
+    ).textContent =
+        "★".repeat(estrellas) +
+        "☆".repeat(3-estrellas);
+
+
+    let progreso=0;
+
+
+    if(juego.nivel === 1){
+
+        progreso =
+            juego.pregunta /
+            preguntasNivel1.length *
+            100;
+
+    }else{
+
+        if(
+            juego.actual === juego.meta
+        ){
+
+            progreso=100;
+
+        }else{
+
+            progreso =
+                Math.min(
+                    90,
+                    juego.movimientos /
+                    7 *
+                    100
+                );
+
+        }
+
+    }
+
+
+    progreso =
+        Math.max(
+            0,
+            Math.min(
+                100,
+                progreso
+            )
+        );
+
+
+    document.getElementById(
+        "progressFill"
+    ).style.width =
+        progreso+"%";
+
+
+    document.getElementById(
+        "progressText"
+    ).textContent =
+        Math.round(progreso)+"%";
+
+
+    guardarEstado();
+
+}
+
+
+/* =========================================================
+   COMPLETAR NIVEL
+   ========================================================= */
+
+function completarNivel(){
+
+    if(juego.finalizando){
+        return;
+    }
+
+
+    juego.finalizando=true;
+
+
+    const estrellas =
+        calcularEstrellas();
+
+
+    estado.completados[
+        juego.nivel-1
+    ]=true;
+
+
+    estado.estrellas[
+        juego.nivel-1
+    ] =
+        Math.max(
+            estado.estrellas[
+                juego.nivel-1
+            ],
+            estrellas
+        );
+
+
+    estado.desbloqueado =
+        Math.max(
+            estado.desbloqueado,
+            Math.min(
+                TOTAL_NIVELES,
+                juego.nivel+1
+            )
+        );
+
+
+    estado.nivelActual =
+        Math.min(
+            TOTAL_NIVELES,
+            juego.nivel+1
+        );
+
+
+    guardarEstado();
+
+
+    sonido("complete");
+
+
+    if(juego.nivel === 5){
+
+        setTimeout(
+            mostrarPantallaFinal,
+            500
+        );
+
+        return;
+    }
+
+
+    document.getElementById(
+        "completeTitle"
+    ).textContent =
+        `¡Nivel ${juego.nivel} completado!`;
+
+
+    document.getElementById(
+        "completeText"
+    ).textContent =
+        `Superaste "${niveles[juego.nivel-1].titulo}".`;
+
+
+    document.getElementById(
+        "completePoints"
+    ).textContent =
+        estado.puntos;
+
+
+    document.getElementById(
+        "completeStars"
+    ).textContent =
+        "★".repeat(estrellas) +
+        "☆".repeat(3-estrellas);
+
+
+    document.getElementById(
+        "completeMoves"
+    ).textContent =
+        juego.movimientos;
+
+
+    document.getElementById(
+        "completeAttempts"
+    ).textContent =
+        juego.intentos;
+
+
+    document.getElementById(
+        "completeExplanation"
+    ).innerHTML =
+        `<strong>🧠 Concepto aprendido:</strong>
+        <br>
+        ${niveles[juego.nivel-1].explicacion}`;
+
+
+    document.getElementById(
+        "nextLevelButton"
+    ).textContent =
+        `Ir al nivel ${juego.nivel+1} →`;
+
+
+    mostrarPantalla(
+        "completeScreen"
+    );
+
+}
+
+
+/* =========================================================
+   PANTALLA FINAL
+   ========================================================= */
+
+function mostrarPantallaFinal(){
+
+    mostrarPantalla(
+        "finalScreen"
+    );
+
+
+    document.getElementById(
+        "finalPoints"
+    ).textContent =
+        estado.puntos;
+
+
+    document.getElementById(
+        "finalStars"
+    ).textContent =
+        estado.estrellas
+        .map(
+            estrellas =>
+                "★".repeat(estrellas)
+        )
+        .join(" ");
+
+
+    document.getElementById(
+        "finalMoves"
+    ).textContent =
+        juego.movimientos;
+
+
+    sonido("victory");
+
+}
+
+
+/* =========================================================
+   INICIAR NIVEL
+   ========================================================= */
+
+function iniciarNivel(numero){
+
+    if(
+        numero < 1 ||
+        numero > TOTAL_NIVELES ||
+        numero > estado.desbloqueado
+    ){
+        return;
+    }
+
+
+    juego.nivel=numero;
+
+
+    crearGrafo(numero);
+
+
+    const data =
+        niveles[numero-1];
+
+
+    document.getElementById(
+        "levelTitle"
+    ).textContent =
+        `Nivel ${numero} — ${data.titulo}`;
+
+
+    document.getElementById(
+        "levelSubtitle"
+    ).textContent =
+        data.subtitulo;
+
+
+    document.getElementById(
+        "levelBadge"
+    ).textContent =
+        `NIVEL ${numero}`;
+
+
+    document.getElementById(
+        "objectiveText"
+    ).textContent =
+        data.objetivo;
+
+
+    document.getElementById(
+        "progressLabel"
+    ).textContent =
+        `Nivel ${numero} · ${data.titulo}`;
+
+
+    const infoList =
+        document.getElementById(
+            "infoList"
+        );
+
+
+    infoList.innerHTML="";
+
+
+    let informacion=[];
+
+
+    if(numero === 1){
+
+        informacion=[
+            "Identifica nodos.",
+            "Reconoce aristas.",
+            "Observa los vecinos.",
+            "Responde las 5 preguntas."
+        ];
+
+    }
+
+
+    if(numero === 2){
+
+        informacion=[
+            "Inicio: Entrada.",
+            "Meta: Biblioteca.",
+            "Solo puedes moverte por conexiones directas.",
+            "Cada movimiento cuenta."
+        ];
+
+    }
+
+
+    if(numero === 3){
+
+        informacion=[
+            "Inicio: Entrada.",
+            "Meta: Biblioteca.",
+            "Los números representan costos.",
+            "Se utiliza Dijkstra para encontrar el mínimo."
+        ];
+
+    }
+
+
+    if(numero === 4){
+
+        informacion=[
+            "Inicio: Entrada.",
+            "Meta: Cafetería.",
+            "Las conexiones rojas están congestionadas.",
+            "Busca una alternativa."
+        ];
+
+
+        setTimeout(
+            generarCongestion,
+            1500
+        );
+
+    }
+
+
+    if(numero === 5){
+
+        informacion=[
+            "Inicio: Entrada.",
+            "Debes visitar Biblioteca.",
+            "Debes visitar Laboratorio.",
+            "Final: Punto de encuentro.",
+            "Máximo: 9 movimientos."
+        ];
+
+    }
+
+
+    informacion.forEach(
+        texto => {
+
+            const li =
+                document.createElement("li");
+
+            li.textContent=texto;
+
+            infoList.appendChild(li);
+
+        }
+    );
+
+
+    document.getElementById(
+        "quizArea"
+    ).classList.add("hidden");
+
+
+    document.getElementById(
+        "quizArea"
+    ).innerHTML="";
+
+
+    if(numero === 1){
+
+        mensaje(
+            "Haz clic sobre los nodos para conocer sus vecinos y responde las preguntas.",
+            "info"
+        );
+
+    }else{
+
+        mensaje(
+            `Comienza en ${nodoPorId(data.inicio).nombre} ` +
+            `y llega hasta ${nodoPorId(data.meta).nombre}.`,
+            "info"
+        );
+
+    }
+
+
+    mostrarPantalla(
+        "gameScreen"
+    );
+
+
+    actualizarPanel();
+
+
+    if(numero === 1){
+
+        prepararQuiz();
+
+    }
+
+}
+
+
+/* =========================================================
+   MENÚ DE NIVELES
+   ========================================================= */
+
+function actualizarMenu(){
+
+    const grid =
+        document.getElementById(
+            "levelGrid"
+        );
+
+
+    grid.innerHTML="";
+
+
+    niveles.forEach(
+        (nivel,index) => {
+
+            const numero=index+1;
+
+            const desbloqueado =
+                numero <= estado.desbloqueado;
+
+
+            const completado =
+                estado.completados[index];
+
+
+            const card =
+                document.createElement("button");
+
+
+            card.className =
+                "level-card " +
+                (
+                    desbloqueado ?
+                    "" :
+                    "locked"
+                );
+
+
+            card.disabled =
+                !desbloqueado;
+
+
+            const estadoTexto =
+                completado ?
+                "✓ Completado" :
+                desbloqueado ?
+                "▶ Disponible" :
+                "🔒 Bloqueado";
+
+
+            card.innerHTML = `
+
+                <div class="level-number">
+                    ${numero}
+                </div>
+
+                <div
+                    class="level-status
+                    ${completado ? "status-done" : ""}
+                    ${!desbloqueado ? "status-lock" : ""}
+                    "
+                >
+                    ${estadoTexto}
+                </div>
+
+                <h3>
+                    ${nivel.titulo}
+                </h3>
+
+                <p>
+                    ${nivel.subtitulo}
+                </p>
+
+            `;
+
+
+            if(desbloqueado){
+
+                card.addEventListener(
+                    "click",
+                    () => iniciarNivel(numero)
+                );
+
+            }
+
+
+            grid.appendChild(card);
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   MOSTRAR PANTALLA
+   ========================================================= */
+
+function mostrarPantalla(id){
+
+    const pantallas=[
+        "homeScreen",
+        "levelsScreen",
+        "gameScreen",
+        "completeScreen",
+        "finalScreen"
+    ];
+
+
+    pantallas.forEach(
+        pantalla => {
+
+            document
+                .getElementById(pantalla)
+                .classList.add("hidden");
+
+        }
+    );
+
+
+    document
+        .getElementById(id)
+        .classList.remove("hidden");
+
+
+    window.scrollTo({
+        top:0,
+        behavior:"smooth"
+    });
+
+
+    document
+        .getElementById("menuButton")
+        .classList.toggle(
+            "hidden",
+            id === "homeScreen"
+        );
+
+}
+
+
+/* =========================================================
+   MENSAJES
+   ========================================================= */
+
+function mensaje(texto,tipo="info"){
+
+    const elemento =
+        document.getElementById(
+            "message"
+        );
+
+
+    elemento.textContent=texto;
+
+    elemento.className=
+        "message "+tipo;
+
+}
+
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+
+let toastTimer=null;
+
+
+function toast(texto){
+
+    const elemento =
+        document.getElementById(
+            "toast"
+        );
+
+
+    elemento.textContent=texto;
+
+    elemento.classList.add("show");
+
+
+    clearTimeout(toastTimer);
+
+
+    toastTimer =
+        setTimeout(
+            () => {
+                elemento.classList.remove("show");
+            },
+            2500
+        );
+
+}
+
+
+/* =========================================================
+   LOCALSTORAGE
+   ========================================================= */
+
+function estadoInicial(){
+
+    return {
+
+        puntos:0,
+
+        desbloqueado:1,
+
+        nivelActual:1,
+
+        estrellas:[
+            0,
+            0,
+            0,
+            0,
+            0
+        ],
+
+        completados:[
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+
+        sonido:true
+
+    };
+
+}
+
+
+function cargarEstado(){
+
+    try{
+
+        const guardado =
+            localStorage.getItem(
+                STORAGE_KEY
+            );
+
+
+        if(!guardado){
+
+            return estadoInicial();
+
+        }
+
+
+        const datos =
+            JSON.parse(guardado);
+
+
+        return {
+            ...estadoInicial(),
+            ...datos
+        };
+
+    }catch(error){
+
+        return estadoInicial();
+
+    }
+
+}
+
+
+function guardarEstado(){
+
+    try{
+
+        localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify(estado)
+        );
+
+    }catch(error){
+
+        console.warn(
+            "No se pudo guardar el progreso."
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   SONIDOS — WEB AUDIO API
+   ========================================================= */
+
+let audioContext=null;
+
+
+function iniciarAudio(){
+
+    if(!estado.sonido){
+        return;
+    }
+
+
+    if(!audioContext){
+
+        audioContext =
+            new (
+                window.AudioContext ||
+                window.webkitAudioContext
+            )();
+
+    }
+
+
+    if(audioContext.state === "suspended"){
+
+        audioContext.resume();
+
+    }
+
+}
+
+
+function tono(frecuencia,duracion,tipo="sine"){
+
+    if(!estado.sonido){
+        return;
+    }
+
+
+    iniciarAudio();
+
+
+    if(!audioContext){
+        return;
+    }
+
+
+    const oscilador =
+        audioContext.createOscillator();
+
+
+    const ganancia =
+        audioContext.createGain();
+
+
+    oscilador.type=tipo;
+
+    oscilador.frequency.value=
+        frecuencia;
+
+
+    ganancia.gain.setValueAtTime(
+        .0001,
+        audioContext.currentTime
+    );
+
+
+    ganancia.gain.exponentialRampToValueAtTime(
+        .18,
+        audioContext.currentTime+.02
+    );
+
+
+    ganancia.gain.exponentialRampToValueAtTime(
+        .0001,
+        audioContext.currentTime+duracion
+    );
+
+
+    oscilador.connect(ganancia);
+
+    ganancia.connect(
+        audioContext.destination
+    );
+
+
+    oscilador.start();
+
+    oscilador.stop(
+        audioContext.currentTime+
+        duracion
+    );
+
+}
+
+
+function sonido(tipo){
+
+    if(!estado.sonido){
+        return;
+    }
+
+
+    if(tipo === "select"){
+
+        tono(500,.08);
+
+    }
+
+
+    if(tipo === "correct"){
+
+        tono(650,.12);
+
+        setTimeout(
+            () => tono(900,.15),
+            90
+        );
+
+    }
+
+
+    if(tipo === "error"){
+
+        tono(180,.2,"square");
+
+    }
+
+
+    if(tipo === "complete"){
+
+        tono(600,.12);
+
+        setTimeout(
+            () => tono(800,.12),
+            120
+        );
+
+        setTimeout(
+            () => tono(1000,.2),
+            240
+        );
+
+    }
+
+
+    if(tipo === "victory"){
+
+        tono(500,.12);
+
+        setTimeout(
+            () => tono(650,.12),
+            120
+        );
+
+        setTimeout(
+            () => tono(800,.12),
+            240
+        );
+
+        setTimeout(
+            () => tono(1100,.25),
+            360
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   BOTÓN DE SONIDO
+   ========================================================= */
+
+document
+    .getElementById("soundButton")
+    .addEventListener(
+        "click",
+        () => {
+
+            estado.sonido =
+                !estado.sonido;
+
+
+            document
+                .getElementById(
+                    "soundButton"
+                )
+                .textContent =
+                    estado.sonido ?
+                    "🔊" :
+                    "🔇";
+
+
+            guardarEstado();
+
+
+            if(estado.sonido){
+
+                iniciarAudio();
+
+                tono(700,.1);
+
+                toast(
+                    "Sonido activado."
+                );
+
+            }else{
+
+                toast(
+                    "Sonido desactivado."
+                );
+
+            }
+
+        }
+    );
+
+
+/* =========================================================
+   BOTONES PRINCIPALES
+   ========================================================= */
+
+document
+    .getElementById("startButton")
+    .addEventListener(
+        "click",
+        () => {
+
+            iniciarAudio();
+
+            actualizarMenu();
+
+            mostrarPantalla(
+                "levelsScreen"
+            );
+
+        }
+    );
+
+
+document
+    .getElementById("menuButton")
+    .addEventListener(
+        "click",
+        () => {
+
+            actualizarMenu();
+
+            mostrarPantalla(
+                "levelsScreen"
+            );
+
+        }
+    );
+
+
+document
+    .getElementById("levelsButton")
+    .addEventListener(
+        "click",
+        () => {
+
+            actualizarMenu();
+
+            mostrarPantalla(
+                "levelsScreen"
+            );
+
+        }
+    );
+
+
+document
+    .getElementById("restartLevelButton")
+    .addEventListener(
+        "click",
+        () => {
+
+            iniciarNivel(
+                juego.nivel
+            );
+
+        }
+    );
+
+
+document
+    .getElementById("nextLevelButton")
+    .addEventListener(
+        "click",
+        () => {
+
+            iniciarNivel(
+                juego.nivel+1
+            );
+
+        }
+    );
+
+
+document
+    .getElementById("playAgainButton")
+    .addEventListener(
+        "click",
+        () => {
+
+            const sonidoActual =
+                estado.sonido;
+
+
+            estado =
+                estadoInicial();
+
+
+            estado.sonido =
+                sonidoActual;
+
+
+            guardarEstado();
+
+
+            actualizarMenu();
+
+
+            iniciarNivel(1);
+
+        }
+    );
+
+
+/* =========================================================
+   REINICIAR PROGRESO
+   ========================================================= */
+
+function abrirConfirmacion(){
+
+    document
+        .getElementById(
+            "confirmModal"
+        )
+        .classList.remove("hidden");
+
+}
+
+
+document
+    .getElementById(
+        "resetProgressButton"
+    )
+    .addEventListener(
+        "click",
+        abrirConfirmacion
+    );
+
+
+document
+    .getElementById(
+        "cancelModalButton"
+    )
+    .addEventListener(
+        "click",
+        () => {
+
+            document
+                .getElementById(
+                    "confirmModal"
+                )
+                .classList.add(
+                    "hidden"
+                );
+
+        }
+    );
+
+
+document
+    .getElementById(
+        "confirmModalButton"
+    )
+    .addEventListener(
+        "click",
+        () => {
+
+            const sonidoActual =
+                estado.sonido;
+
+
+            estado =
+                estadoInicial();
+
+
+            estado.sonido =
+                sonidoActual;
+
+
+            guardarEstado();
+
+
+            document
+                .getElementById(
+                    "confirmModal"
+                )
+                .classList.add(
+                    "hidden"
+                );
+
+
+            actualizarMenu();
+
+
+            mostrarPantalla(
+                "levelsScreen"
+            );
+
+
+            toast(
+                "Progreso reiniciado correctamente."
+            );
+
+        }
+    );
+
+
+/* =========================================================
+   TECLADO
+   ========================================================= */
+
+document.addEventListener(
+    "keydown",
+    evento => {
+
+        if(evento.key === "Escape"){
+
+            document
+                .getElementById(
+                    "confirmModal"
+                )
+                .classList.add(
+                    "hidden"
+                );
+
+        }
+
+
+        if(
+            evento.key === "m" ||
+            evento.key === "M"
+        ){
+
+            actualizarMenu();
+
+            mostrarPantalla(
+                "levelsScreen"
+            );
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   INICIALIZACIÓN
+   ========================================================= */
+
+actualizarMenu();
+
+
+document
+    .getElementById(
+        "soundButton"
+    )
+    .textContent =
+        estado.sonido ?
+        "🔊" :
+        "🔇";
+
+
+</script>
+
+</body>
+</html>
